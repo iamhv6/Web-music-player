@@ -1,0 +1,54 @@
+#ytdl usage to download a video/audio on a given query 
+
+
+import yt_dlp
+
+def download_song(song_name):
+    search_query = f"ytsearch:{song_name} audio"
+    ydl_opts = {
+     #   "ffmpeg_location": "C:/ffmpeg",
+        "format": "bestaudio/best",
+        "outtmpl": f"songs/{song_name}.mp3", 
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }
+        ],
+    }
+    download(ydl_opts, search_query)
+  
+def dlvideo(song_name):
+    search_query = f"ytsearch:{song_name}" #used ffmpeg only to realise it works without ffmpeg
+    ydl_opts = {
+     #   "ffmpeg_location": "C:/ffmpeg",
+        "format": "bestvideo+bestaudio/best", #"video/mp4;", 
+        "outtmpl": f"songs/{song_name}.mp4",  
+     #   "writesubtitles": True,  # Download subtitles
+     #   "writeautomaticsub": True,
+    #    "subtitleslangs": "en",  # English subtitles
+     #   "subtitlesformat": "txt",  # Save as .srt format
+    #    "postprocessors": [
+     #       {
+    #            "key": "FFmpegEmbedSubtitle",  
+    #        }
+     #   ],
+    # 
+    }
+    print(ydl_opts) #shows what you are downloading
+    download(ydl_opts, search_query)
+
+def download(ydl_opts, search_query): #function that downloads the the song
+  with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    ydl.download([search_query])
+
+song = input("Enter the song name: ")
+video_type = input("Enter the video type (mp3/mp4): ")
+
+if video_type == "mp3":
+    download_song(song)
+elif video_type == "mp4":
+    dlvideo(song)
+else:
+    print("Invalid video type! Please choose either 'mp3' or 'mp4'.") 

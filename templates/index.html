@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Music Player</title>
+    <style>
+        /* Light & Dark Mode Variables */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #d31616;
+            --form-bg: rgba(50, 63, 58, 0.1);
+            --button-bg: linear-gradient(to right, #ff9966, #ff5f6d);
+            --shadow: rgba(0, 0, 0, 0.2);
+          /*  transition: all 4s ease;*/
+        }
+
+        body.light-mode {
+            --form-bg: rgb(235, 210, 210);
+            --shadow: rgb(0, 0, 0);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image: url('https://wallpapers.com/images/hd/doodle-anime-illustration-5p26sk5au6h0e8y5.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /*background-attachment: fixed;*/
+           /* transition: all 2s ease;*/
+        }
+        body.dark-mode {
+          /*  --bg-color: #000000;*/
+            --text-color: #ffffff;
+            --form-bg: rgb(0, 0, 0);
+            --shadow: rgb(255, 255, 255);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image: url('https://wallpapercat.com/w/full/6/2/a/2117716-3840x2160-desktop-4k-dark-wallpaper-photo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /*transition: all 2s ease;*/
+            /*background-image: none; /* No background image in dark mode */
+        }
+
+        /* Global Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: all 4s ease;
+        }
+
+        h1 {
+            --text-color:#3577aa;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* Form Container */
+        .form-container {
+            background-image: url('https://img.freepik.com/free-photo/caucasian-pianist-playing-chord-with-focus-generated-by-ai_188544-11104.jpg'); 
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 20px var(--shadow);
+            backdrop-filter: blur(10px);
+            width: 350px;
+            text-align: center;
+           /* transition: all 0.5s ease;*/
+        }
+
+        label {
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+           /* transition: all 0.4s ease;*/
+        }
+
+        input:focus, select:focus {
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 0px 10px var(--shadow);
+        }
+
+        /* Button Styling */
+        button {
+            background: var(--button-bg);
+            color: white;
+            font-size: 1.2rem;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            /*transition: all 4s ease;*/
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 5px 15px rgba(255, 95, 109, 0.6);
+        }
+
+        /* Loading Box */
+        .loading-box {
+            display: none;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Theme Switch */
+        .theme-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            transition: all 4s ease;
+        }
+
+        .switch-label {
+            font-size: 1rem;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 25px;
+            
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #563e3e;
+            /*transition: all 4s ease;*/
+            border-radius: 25px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 3px;
+            background-color: rgba(13, 14, 12, 0.805);
+           /* transition: 0.4s;*/
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #fb2201e4;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 400px) {
+            .form-container {
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dark Mode Switch -->
+    <div class="theme-switch">
+        <label class="switch-label">🌙 Dark Mode</label>
+        <label class="switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <h1>🎵 Web Music Player 🎶</h1>  
+    <div class="form-container">
+        <form id="search-form">
+            
+            <label for="song">Enter Song Name:</label>
+            <input type="text" id="song" name="song" required placeholder="Type a song name...">
+            <label for="type">Select Type:</label>
+            <select id="type" name="type">
+                <option value="mp3">🎧 Audio</option>
+                <option value="mp4">🎥 Video</option>
+            </select>
+
+            <button type="submit">🔍 Search and Play</button>
+        </form>
+
+        <div class="loading-box" id="loading-box">Loading... Please wait...</div>
+
+        <div id="quote-container" style="margin-top: 20px; font-size: 1.2rem;"></div>
+    </div>
+
+    <script>
+        async function getRandomQuote() {
+            try {
+                const response = await fetch("/get-quote");
+                if (!response.ok) {
+                  throw new Error("Failed to fetch quote");
+                }
+                const data = await response.json();
+                return `"${data[0].q}" - ${data[0].a}`;
+            } catch (error) {
+        console.error("Error fetching quote:", error);
+        return "Error fetching quote. Please try again.";
+    }
+}
+
+document.getElementById("search-form").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Stop immediate form submission
+
+    const loadingBox = document.getElementById("loading-box");
+    const formContainer = document.querySelector(".form-container");
+    const searchButton = this.querySelector("button[type='submit']"); // Get the submit button
+
+    // Show loading message
+    loadingBox.style.display = "block";
+
+    // Get the random quote
+    const quote = await getRandomQuote();
+
+    // Hide loading message
+    loadingBox.style.display = "none";
+
+    // Hide input fields, labels, and button
+    document.getElementById("song").style.display = "none";
+    document.getElementById("type").style.display = "none";
+    searchButton.style.display = "none"; // Hide the submit button
+
+    document.querySelector("label[for='song']").style.display = "none";
+    document.querySelector("label[for='type']").style.display = "none";
+
+    // Create or update a quote display element inside the form-container
+    let quoteDisplay = document.getElementById("quote-container");
+    if (!quoteDisplay) {
+        quoteDisplay = document.createElement("div");
+        quoteDisplay.id = "quote-container";
+        quoteDisplay.style.marginTop = "10px";
+        quoteDisplay.style.fontStyle = "italic";
+        quoteDisplay.style.fontSize = "1.2rem";
+        quoteDisplay.style.color =  "#d31616";
+        quoteDisplay.style.padding = "10px";
+        formContainer.appendChild(quoteDisplay);
+    }
+    quoteDisplay.textContent = quote;
+
+    // Wait a few seconds to display the quote, then submit the form
+    setTimeout(() => {
+        this.action = ""; // Set form action, keep it empty for local host
+        this.method = "POST"; // Ensure it's POST
+        this.submit(); // Submit form
+    }, 3000); // 3-second delay to show the quote before submitting
+});
+
+        // Check Local Storage for Theme Preference
+        document.addEventListener("DOMContentLoaded", function () {
+            const themeToggle = document.getElementById("theme-toggle");
+            const body = document.body;
+
+            if (localStorage.getItem("darkMode") === "enabled") {
+                body.classList.add("dark-mode");
+                body.classList.remove("light-mode");
+                themeToggle.checked = true;
+            } else {
+                body.classList.add("light-mode");
+            }
+
+            themeToggle.addEventListener("change", function () {
+                if (themeToggle.checked) {
+                    body.classList.remove("light-mode");
+                    body.classList.add("dark-mode");
+                    localStorage.setItem("darkMode", "enabled");
+                } else {
+                    body.classList.remove("dark-mode");
+                    body.classList.add("light-mode")
+                    localStorage.setItem("darkMode", "disabled");
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

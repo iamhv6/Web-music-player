@@ -1,0 +1,101 @@
+
+#ytdl based song gussing game
+#logic used here is basically
+#we download a song from a given yt channel without its title
+#and if the initial title of the audio has the 
+
+
+import os
+import random
+import time
+import yt_dlp
+
+DOWNLOAD_FOLDER = "game"
+VIDEO_FILE = f"{DOWNLOAD_FOLDER}/video.mp4" #incase if you want to download it as a video and make it a video guessing game with or without audio 
+AUDIO_FILE = f"{DOWNLOAD_FOLDER}/audio.mp3"
+
+def get_video_links(channel_url="https://www.youtube.com/@Rousseau/videos"): #anything
+    
+    try:
+        ydl_opts = {
+            "quiet": True,
+            "extract_flat": True,
+            "force_generic_extractor": True
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(channel_url, download=False)
+            print(info)
+        return [entry["url"] for entry in info["entries"] if "url" in entry]
+
+    except Exception as e: #incase if ytdl fails
+        print(e)
+        return []
+
+def delete_old_files():
+    
+    if os.path.exists(AUDIO_FILE): #Everytime you guess the song correctly the file would be deleted 
+        os.remove(AUDIO_FILE)
+
+def download_video(video_url):
+    
+    if not os.path.exists(DOWNLOAD_FOLDER):
+        os.makedirs(DOWNLOAD_FOLDER)
+
+    delete_old_files() #unsecure
+
+    try:
+        ydl_opts = {  #we are only dowloading the audio
+            "outtmpl": f"{DOWNLOAD_FOLDER}/game.%(ext)s", #/%(title)s.%(ext)s",
+            "format": "bestaudio/best", #bestvideo+bestaudio/best if you want to download the video
+            "postprocessors": [         #but make nessary changes here if you want to download the video
+                {
+                    "key": "FFmpegExtractAudio",  #ytdl format
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }
+            ],
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=True)
+            filename = ydl.prepare_filename(info)
+            title = info.get("title", "Unknown Title")
+        
+        # Rename downloaded file to standard names
+        os.rename(filename.replace(".webm", ".mp3"), AUDIO_FILE)
+
+        return AUDIO_FILE, title
+
+    except Exception as e:
+        print("Error downloading video:", e)
+        return None, None
+
+def play_guessing_game():
+    
+    video_links = get_video_links()
+    
+    if not video_links:
+        print("No videos found!")
+        return
+
+    while True:
+        video_url = random.choice(video_links)
+        audio_path, video_title = download_video(video_url)
+
+        if audio_path:
+           
+
+           
+            while True:
+                guess = input("Guess the song name: ").strip().lower()
+                if guess in video_title.lower():
+                    print("✅ Correct! onto the next one...\n")
+                    delete_old_files() 
+                    time.sleep(2)
+
+                    break  
+                else:
+                    print("❌ Wrong guess. Try again!")
+
+play_guessing_game()

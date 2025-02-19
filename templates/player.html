@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('{{ thumbnail }}');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+        .player-container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .uploader, .duration {
+            font-size: 16px;
+            margin: 5px 0;
+            opacity: 0.8;
+        }
+        audio, video {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 10px;
+        }
+        .toggle-btn {
+            background: linear-gradient(to right, #ff9966, #ff5f6d);
+            color: white;
+            font-size: 16px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .toggle-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .hidden {
+            display: none;
+            color: white;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        a:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <h1 class="title">{{ title }}</h1>
+        <p class="uploader">Uploaded by: <strong>{{ uploader }}</strong></p>
+        <p class="duration">Duration: {{ "%02d:%02d" % (duration // 60, duration % 60) }}</p>
+        
+        {% if type == "audio" %}
+            <audio controls>
+                <source src="{{ url_for('serve_file', filename=filename) }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        {% elif type == "video" %}
+            <video controls>
+                <source src="{{ url_for('serve_file', filename=filename) }}" type="video/mp4">
+              <!--  <track src="{{ url_for('serve_file', filename=srt) }}" kind="subtitles" srclang="en" label="English" default>--> <!--use this if you want to download subtitles from ytdl and play it during the video-->
+                Your browser does not support the video element.
+            </video>
+        {% endif %}  
+
+        <button class="toggle-btn" onclick="toggleContent('description')">Show Description</button>
+        <button class="toggle-btn" onclick="toggleContent('lyrics')">Show Lyrics</button>
+        
+        <p id="description" class="hidden">{{ description }}</p>
+        <p id="lyrics" class="hidden">{{ lyrics }}</p>
+        
+        <a href="/">Back to Search</a>  
+    </div>
+    
+    <script>
+        
+        function toggleContent(id) {
+            var content = document.getElementById(id);
+            content.classList.toggle("hidden");
+        }
+    
+    </script>
+</body>
+</html>
+        
