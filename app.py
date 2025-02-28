@@ -19,7 +19,6 @@ def download(ydl_opts, search_query): #the main function that will downlaod the 
         ydl.download([search_query])
 
 def extract_metadata(info): #function to get metadata of the video you are downloading, used to enchance your web ui
-    
     if "entries" not in info or not info["entries"]: #meta data if ytdl doesnt find any metadata
         return {
             "title": "Unable to fetch",
@@ -117,6 +116,31 @@ def get_quote(): #function that generates a random quote while the video is bein
         return jsonify(data) 
     except Exception as e:
         return jsonify({"error": str(e)}), 500 #usually wont throw up an error
+
+@app.route("/next")
+def next_song():
+    song_name = request.args.get("song")
+    file_type = request.args.get("type", "audio")  # Default to "audio" if type is not provided
+
+    if song_name:
+        if file_type == "audio":
+            metadata = download_song(song_name)  # Download the next audio song
+        elif file_type == "video":
+            metadata = dlvideo(song_name)  # Download the next video
+        else:
+            return jsonify({"error": "Invalid file type"}), 400
+
+        return jsonify({
+            "url": f"/songs/{metadata['filename']}",  # URL to the downloaded file
+            "title": metadata["title"],  # Send the title for display
+            "uploader": metadata["uploader"],  # Send the uploader for display
+            "duration": metadata["duration"],  # Send the duration for display
+            "thumbnail": metadata["thumbnail"],  # Send the thumbnail for display
+            "description": metadata["description"],  # Send the description for display
+            "lyrics": metadata["lyrics"],  # Send the lyrics for display
+            "type": file_type,  # Send the file type (audio or video)
+        })
+    return jsonify({"error": "No song provided"}), 400
 
 @app.route("/songs/<filename>")  #the path where your downloaded mp3/mp4 file will be saved
 def serve_file(filename):
