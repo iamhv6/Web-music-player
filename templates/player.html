@@ -83,6 +83,25 @@
         a:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+        .queue-section {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: left;
+        }
+        .queue-section h3 {
+            margin: 0 0 10px 0;
+        }
+        .queue-section ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .queue-section ul li {
+            padding: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -92,35 +111,131 @@
         <p class="duration">Duration: {{ "%02d:%02d" % (duration // 60, duration % 60) }}</p>
         
         {% if type == "audio" %}
-            <audio controls>
-                <source src="{{ url_for('serve_file', filename=filename) }}" type="audio/mpeg">
+            <audio id="media-player" controls>
+                <source id="audio-source" src="{{ url_for('serve_file', filename=filename) }}" type="audio/mpeg">
+                
                 Your browser does not support the audio element.
             </audio>
         {% elif type == "video" %}
-            <video controls>
+        <video id="media-player" controls>
                 <source src="{{ url_for('serve_file', filename=filename) }}" type="video/mp4">
-              <!--  <track src="{{ url_for('serve_file', filename=srt) }}" kind="subtitles" srclang="en" label="English" default>--> <!--use this if you want to download subtitles from ytdl and play it during the video-->
                 Your browser does not support the video element.
             </video>
-        {% endif %}  
+        {% endif %}
 
         <button class="toggle-btn" onclick="toggleContent('description')">Show Description</button>
         <button class="toggle-btn" onclick="toggleContent('lyrics')">Show Lyrics</button>
-        
+        <button class="next-btn, toggle-btn"  onclick="playNextSong()">Next</button>
+
         <p id="description" class="hidden">{{ description }}</p>
         <p id="lyrics" class="hidden">{{ lyrics }}</p>
-        
-        <a href="/">Back to Search</a>  
+
+        <!-- Input box for adding songs to the queue -->
+        <div class="queue-section">
+            <h3>Queue</h3>
+            <input type="text" id="song-input" placeholder="Enter next song name">
+            <button onclick="addToQueue()">Add to Queue</button>
+            <ul id="queue-list"></ul>
+        </div>
+
+        <a href="/">Back to Search</a>
     </div>
-    
+ 
     <script>
+        let queue = []; // Array to store the queue
+        let currentType = "{{ type }}";
+        // Function to add a song to the queue
+        function addToQueue() {
+            const songInput = document.getElementById("song-input");
+            const songName = songInput.value.trim();
+            if (songName) {
+                queue.push(songName);
+                updateQueueDisplay();
+                songInput.value = ""; // Clear the input box
+            }
+        }
+        function playNextSong() {
+    if (queue.length > 0) {
+        const nextSong = queue.shift(); // Remove the first song from the queue
+        updateQueueDisplay();
+
+        console.log("Fetching next song:", nextSong); // Debugging
+
+        // Fetch the next song from the server
+        fetch(`/next?song=${encodeURIComponent(nextSong)}&type=${currentType}`)
+            .then(response => {
+                console.log("Fetch response status:", response.status); // Debugging
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Next file URL:", data.url); // Debugging
+                console.log("Next file type:", data.type); // Debugging
+
+                // Update the media player's source
+                const mediaPlayer = document.getElementById("media-player");
+                if (!mediaPlayer) {
+                    throw new Error("Media player element not found!");
+                }
+                mediaPlayer.src = data.url;
+                mediaPlayer.load();
+
+                // Update metadata
+                document.querySelector("title").textContent = data.title;
+                document.querySelector(".title").textContent = data.title;
+                document.querySelector(".uploader").innerHTML = `Uploaded by: <strong>${data.uploader}</strong>`;
+                document.querySelector(".duration").textContent = `Duration: ${formatDuration(data.duration)}`;
+                document.getElementById("description").textContent = data.description;
+                document.getElementById("lyrics").textContent = data.lyrics;
+
+                // Update the background image (thumbnail)
+                document.body.style.backgroundImage = `url('${data.thumbnail}')`;
+
+                // Play the new media file
+                mediaPlayer.play()
+                    .then(() => {
+                        console.log("Playing next file:", data.url);
+                    })
+                    .catch(error => {
+                        console.error("Error playing the file:", error);
+                        alert("Error playing the file. Please try again.");
+                    });
+            })
+            .catch(error => {
+                console.error("Error fetching the next file:", error);
+                alert("Error fetching the next file. Please try again.");
+            });
+    } else {
+        alert("Queue is empty!");
+    }
+}
+
+// Helper function to format duration (seconds to MM:SS)
+function formatDuration(duration) {
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+
         
+
+        // Function to update the queue display
+        function updateQueueDisplay() {
+            const queueList = document.getElementById("queue-list");
+            queueList.innerHTML = queue.map((song, index) => `<li>${index + 1}. ${song}</li>`).join("");
+        }
+
+        // Function to toggle content visibility
         function toggleContent(id) {
             var content = document.getElementById(id);
             content.classList.toggle("hidden");
         }
+
+        // Event listener for when the audio ends
     
     </script>
 </body>
 </html>
-        
