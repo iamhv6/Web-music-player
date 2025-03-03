@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Music Player</title>
+    <link rel="icon" type="image/x-icon" href="https://www.svgrepo.com/show/453129/listening-to-music.svg" id="icon">
     <style>
         /* Light & Dark Mode Variables */
         :root {
             --bg-color: #ffffff;
-            --text-color: #d31616;
+            --text-color: #2eddda;
             --form-bg: rgba(50, 63, 58, 0.1);
-            --button-bg: linear-gradient(to right, #ff9966, #ff5f6d);
+            --button-bg: linear-gradient(to right, #ff9966, #2befe9);
             --shadow: rgba(0, 0, 0, 0.2);
           /*  transition: all 4s ease;*/
         }
@@ -221,7 +222,7 @@
         <form id="search-form">
             
             <label for="song">Enter Song Name:</label>
-            <input type="text" id="song" name="song" required placeholder="Type a song name...">
+            <input type="text" id="song" name="song" required placeholder="Type a song name - artist">
             <label for="type">Select Type:</label>
             <select id="type" name="type">
                 <option value="mp3">🎧 Audio</option>
